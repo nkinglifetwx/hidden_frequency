@@ -4,8 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#f8f7f4">
-  <meta name="description" content="Hidden Frequencies — find music beyond your usual rotation.">
-  <title>Hidden Frequencies — Find your next sound</title>
+  <meta name="description" content="Hidden Frequencies — découvre des sons qui te ressemblent.">
+  <title>Hidden Frequencies — Trouve ton ambiance</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -19,77 +19,77 @@
       <span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
       <span>hidden<span class="brand-light">frequencies</span></span>
     </a>
-    <div class="top-note"><span class="live-dot"></span> YOUR PERSONAL SOUND SCOUT</div>
-    <a class="about-link" href="#about">THE IDEA <span>↘</span></a>
+    <div class="top-note"><span class="live-dot"></span> TON ESPACE MUSICAL</div>
+    <a class="about-link" href="#about">À PROPOS <span>↘</span></a>
   </header>
 
   <main>
     <section class="hero">
-      <div class="eyebrow"><span>01</span><span class="eyebrow-line"></span><span>GOOD MUSIC DOESN'T NEED HYPE</span></div>
+      <div class="eyebrow"><span>01</span><span class="eyebrow-line"></span><span>DES SONS, PAS DU BRUIT</span></div>
       <div class="hero-grid">
         <div>
-          <h1>Find your<br>next <em>frequency.</em></h1>
-          <p class="hero-copy">A feeling, a scene, a late-night thought. Describe the sound you’re looking for and follow the trail somewhere new.</p>
+          <h1>Trouve ton<br><em>ambiance.</em></h1>
+          <p class="hero-copy">Une humeur, un lieu, un instant. Décris ce que tu ressens, on cherche la musique.</p>
         </div>
         <div class="orbit-art" aria-label="Abstract sound-wave illustration">
           <div class="orbit orbit-a"></div><div class="orbit orbit-b"></div><div class="orbit orbit-c"></div>
           <div class="orbit-core"><span>HF</span></div>
-          <span class="orbit-label label-top">SIGNAL FOUND</span><span class="orbit-label label-bottom">NO. 001 / UNKNOWN</span>
+          <span class="orbit-label label-top">SIGNAL CAPTÉ</span><span class="orbit-label label-bottom">HF / 001</span>
           <span class="orbit-cross cross-a">✳</span><span class="orbit-cross cross-b">＋</span>
         </div>
       </div>
 
       <form id="search-form" class="prompt-box">
-        <div class="prompt-top"><span class="tiny-label">DESCRIBE YOUR SOUND</span><span class="prompt-counter">DISCOVERY ENGINE <span class="blue-dot"></span></span></div>
-        <label class="sr-only" for="vibe-input">Describe the music you want to find</label>
-        <textarea id="vibe-input" rows="2" maxlength="240" placeholder="e.g. hazy indie for a train ride just before sunset…" required></textarea>
+        <div class="prompt-top"><span class="tiny-label">DÉCRIS TON AMBIANCE</span><span class="prompt-counter">À L’ÉCOUTE <span class="blue-dot"></span></span></div>
+        <label class="sr-only" for="vibe-input">Décris la musique que tu cherches</label>
+        <textarea id="vibe-input" rows="2" maxlength="240" placeholder="Ex. : mélancolique, basse profonde, trajet de nuit…" required></textarea>
         <div class="prompt-bottom">
-          <span class="hint"><span class="spark">✳</span> Genres help. Feelings work too.</span>
-          <button class="discover-btn" type="submit">Find my sound <span>↗</span></button>
+          <span class="hint"><span class="spark">✳</span> Une émotion suffit.</span>
+          <button class="discover-btn" type="submit">Trouver mon son <span>↗</span></button>
         </div>
       </form>
       <div class="quick-picks">
-        <span class="tiny-label">START WITH A MOOD</span>
-        <button type="button" class="chip" data-vibe="dreamy indie, hazy guitars, bittersweet">dreamy indie</button>
-        <button type="button" class="chip" data-vibe="warm electronic music for late night drives">night drive</button>
-        <button type="button" class="chip" data-vibe="intimate modern jazz, soft piano, mellow">soft focus</button>
-        <button type="button" class="chip" data-vibe="underground alternative rock, energetic guitars">off the radar</button>
-        <button type="button" class="chip" data-vibe="French indie pop, poetic, understated">French touch</button>
+        <span class="tiny-label">OU CHOISIS UNE VIBE</span>
+        <button type="button" class="chip" data-vibe="indie rêveuse, hazy guitars, bittersweet">indie rêveuse</button>
+        <button type="button" class="chip" data-vibe="warm electronic music for late trajet de nuits">trajet de nuit</button>
+        <button type="button" class="chip" data-vibe="intimate modern jazz, soft piano, mellow">jazz doux</button>
+        <button type="button" class="chip" data-vibe="underground alternative rock, energetic guitars">hors radar</button>
+        <button type="button" class="chip" data-vibe="French indie pop, poetic, understated">pop française</button>
       </div>
     </section>
 
     <section class="results-section" id="results">
       <div class="section-heading">
-        <div><div class="eyebrow"><span>02</span><span class="eyebrow-line"></span><span>YOUR DISCOVERY FEED</span></div><h2 id="results-title">A little further from the usual.</h2></div>
-        <div id="results-meta" class="results-meta">CURATED BY CURIOSITY</div>
+        <div><div class="eyebrow"><span>02</span><span class="eyebrow-line"></span><span>À DÉCOUVRIR</span></div><h2 id="results-title">Un peu plus loin.</h2></div>
+        <div id="results-meta" class="results-meta">SÉLECTION MUSICALE</div>
       </div>
       <div class="filter-row">
         <div class="filter-copy"><span class="filter-pulse"></span><span id="status" role="status">Describe a vibe to tune your feed.</span></div>
-        <label class="sort-control">SORT <select id="sort-select" aria-label="Sort results"><option value="match">Best match</option><option value="title">A–Z</option><option value="artist">Artist</option></select></label>
+        <label class="sort-control">TRIER <select id="sort-select" aria-label="Trier les résultats"><option value="match">Pertinence</option><option value="title">A–Z</option><option value="artist">Artiste</option></select></label>
       </div>
       <div id="ai-note" class="ai-note" hidden></div>
       <div id="track-grid" class="track-grid"></div>
-      <div id="empty-state" class="empty-state"><div class="empty-glyph">〰</div><strong>Your next favourite is out there.</strong><span>Start with a mood above. We’ll see what turns up.</span></div>
-      <button id="more-btn" class="more-btn" type="button" hidden>Explore more results <span>＋</span></button>
+      <div id="empty-state" class="empty-state"><div class="empty-glyph">〰</div><strong>Ta prochaine découverte t’attend.</strong><span>Décris une ambiance pour commencer.</span></div>
+      <button id="more-btn" class="more-btn" type="button" hidden>Voir plus de sons <span>＋</span></button>
     </section>
 
     <section class="saved-section" id="saved-section" hidden>
-      <div class="eyebrow"><span>03</span><span class="eyebrow-line"></span><span>YOUR SHORTLIST</span></div>
-      <div class="saved-head"><h2>Keep the ones that stay.</h2><span id="saved-count">0 SAVED</span></div>
+      <div class="eyebrow"><span>03</span><span class="eyebrow-line"></span><span>TES FAVORIS</span></div>
+      <div class="saved-head"><h2>À garder près de soi.</h2><span id="saved-count">0 SAVED</span></div>
       <div id="saved-list" class="saved-list"></div>
     </section>
 
     <section class="about-section" id="about">
       <div class="about-stamp"><span>HF</span><i>✳</i></div>
-      <div class="about-copy"><span class="tiny-label">A NOTE ON DISCOVERY</span><h2>Less scrolling.<br><em>More feeling.</em></h2></div>
-      <p>Hidden Frequencies is a little tool for getting out of your own listening loop. Bring a mood, leave with a new possibility. No perfect taste required.</p>
+      <div class="about-copy"><span class="tiny-label">L’IDÉE</span><h2>Moins défiler.<br><em>Plus ressentir.</em></h2></div>
+      <p>Une humeur, quelques sons inattendus. Et peut-être un nouveau morceau qui reste.</p>
     </section>
   </main>
 
   <footer>
     <a class="brand footer-brand" href="#"><span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span>hidden<span class="brand-light">frequencies</span></span></a>
-    <span>MADE FOR THE NEXT REPEAT.</span>
-    <a href="#top" class="back-top">BACK TO TOP ↑</a>
+    <span>À ÉCOUTER ENCORE.</span>
+    <a href="#top" class="back-top">REMONTER ↑</a>
   </footer>
   <script src="app.js"></script>
 </body>

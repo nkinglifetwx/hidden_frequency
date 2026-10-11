@@ -44,11 +44,11 @@ function trackCard(track, index) {
       <div class="track-title" title="${esc(track.trackName)}">${esc(track.trackName || "Untitled")}</div>
       <div class="track-artist" title="${esc(track.artistName)}">${esc(track.artistName || "Unknown artist")}</div>
       <div class="track-actions">
-        <button class="action-btn ${isSaved?"active":""}" type="button" data-save="${esc(id)}">${isSaved?"✓ SAVED":"♡ KEEP"}</button>
-        <button class="action-btn" type="button" data-skip="${esc(id)}">NOT MY VIBE ↗</button>
+        <button class="action-btn ${isSaved?"active":""}" type="button" data-save="${esc(id)}">${isSaved?"✓ ENREGISTRÉ":"♡ GARDER"}</button>
+        <button class="action-btn" type="button" data-skip="${esc(id)}">PAS MA VIBE ↗</button>
       </div>
     </div>
-    <a class="open-track" href="${esc(track.trackViewUrl || "#")}" target="_blank" rel="noopener noreferrer">OPEN TRACK ↗</a>
+    <a class="open-track" href="${esc(track.trackViewUrl || "#")}" target="_blank" rel="noopener noreferrer">ÉCOUTER ↗</a>
   </article>`;
 }
 function updateEmptyState() { emptyState.hidden = grid.children.length > 0; }
@@ -83,9 +83,9 @@ async function searchTracks(vibe, append = false) {
   if (!append) {
     currentQuery = vibe; offset = 0; currentTracks = []; shownTracks = []; lastDiscovery = null;
     grid.innerHTML = ""; aiNote.hidden = true; aiNote.textContent = "";
-    resultsTitle.textContent = "Finding your frequency…";
-    resultsMeta.textContent = "TUNING THE SIGNAL";
-    status.textContent = "Reading the mood and searching the catalog…";
+    resultsTitle.textContent = "On cherche ton ambiance…";
+    resultsMeta.textContent = "RECHERCHE EN COURS";
+    status.textContent = "On analyse ta vibe et on cherche des morceaux…";
     moreBtn.hidden = true; emptyState.hidden = true;
   } else {
     offset += 12; moreBtn.disabled = true; moreBtn.textContent = "Searching…";
@@ -99,11 +99,11 @@ async function searchTracks(vibe, append = false) {
     const batch = incoming.slice(0, 12);
     shownTracks = shownTracks.concat(batch);
     lastDiscovery = data.discovery || lastDiscovery;
-    resultsTitle.textContent = "A little further from the usual.";
-    resultsMeta.textContent = `${currentTracks.length} TRACKS FOUND`;
+    resultsTitle.textContent = "Un peu plus loin.";
+    resultsMeta.textContent = `${currentTracks.length} MORCEAUX TROUVÉS`;
     status.textContent = data.tracks?.length
-      ? `Results inspired by “${vibe}”. Save your finds, skip what misses, and open tracks to explore further.`
-      : "No matches this time. Try a different mood, genre, or artist.";
+      ? `Inspiré par « ${vibe} ». Garde les sons qui te plaisent.`
+      : "Pas de résultat. Essaie une autre ambiance ou un autre genre.";
     if (lastDiscovery) {
       aiNote.innerHTML = `<strong>THE SIGNAL:</strong> ${esc(lastDiscovery.summary || "A few directions to explore.")} <span>Search paths: ${esc((lastDiscovery.searchTerms || []).join(" · "))}</span>`;
       aiNote.hidden = false;
@@ -113,25 +113,25 @@ async function searchTracks(vibe, append = false) {
     if (!append && incoming.length === 0) updateEmptyState();
   } catch (error) {
     if (requestId !== requestSequence) return;
-    resultsTitle.textContent = "The signal got a little fuzzy.";
-    resultsMeta.textContent = error.status === 503 ? "AI NOT CONFIGURED" : "CONNECTION ISSUE";
+    resultsTitle.textContent = "Petit souci de connexion.";
+    resultsMeta.textContent = error.status === 503 ? "IA NON CONFIGURÉE" : "ERREUR DE CONNEXION";
     if (error.status === 503) {
-      status.textContent = "The AI backend is not configured yet. Add OPENAI_API_KEY to your Cloudflare Pages environment variables, then redeploy.";
+      status.textContent = "La clé OPENAI_API_KEY doit être ajoutée aux secrets Cloudflare Pages, puis le site redéployé.";
     } else {
-      status.textContent = "Could not reach the recommendation engine. Check the deployment and try again.";
+      status.textContent = "Le moteur ne répond pas. Vérifie le déploiement Cloudflare puis réessaie.";
     }
     aiNote.hidden = false;
-    aiNote.textContent = "Setup tip: this version needs Cloudflare Pages Functions and an OpenAI API key stored as a server-side secret.";
+    aiNote.textContent = "Cette version nécessite Cloudflare Pages Functions et une clé API enregistrée côté serveur.";
     moreBtn.hidden = true;
     updateEmptyState();
   } finally {
     moreBtn.disabled = false;
-    moreBtn.innerHTML = 'Explore more results <span>＋</span>';
+    moreBtn.innerHTML = 'Voir plus de sons <span>＋</span>';
   }
 }
 function renderSaved() {
   savedSection.hidden = saved.size === 0;
-  savedCount.textContent = `${saved.size} SAVED`;
+  savedCount.textContent = `${saved.size} ENREGISTRÉ`;
   savedList.innerHTML = [...saved.values()].map(track => {
     const art = artwork(track, "100x100bb");
     return `<div class="saved-row">${art?`<img src="${esc(art)}" alt="">`:""}
@@ -147,7 +147,7 @@ function toggleSaved(id) {
   document.querySelectorAll("[data-save]").forEach(button => {
     const active = saved.has(button.dataset.save);
     button.classList.toggle("active", active);
-    button.textContent = active ? "✓ SAVED" : "♡ KEEP";
+    button.textContent = active ? "✓ ENREGISTRÉ" : "♡ GARDER";
   });
 }
 function applySort() {
