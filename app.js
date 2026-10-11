@@ -5,196 +5,188 @@ const status = document.querySelector("#status");
 const resultsTitle = document.querySelector("#results-title");
 const resultsMeta = document.querySelector("#results-meta");
 const moreBtn = document.querySelector("#more-btn");
+const emptyState = document.querySelector("#empty-state");
 const savedSection = document.querySelector("#saved-section");
 const savedList = document.querySelector("#saved-list");
 const savedCount = document.querySelector("#saved-count");
+const sortSelect = document.querySelector("#sort-select");
+const aiNote = document.querySelector("#ai-note");
 
 let currentQuery = "";
 let currentTracks = [];
+let shownTracks = [];
 let offset = 0;
-let saved = new Map();
+const saved = new Map();
 let activeAudio = null;
 let activeButton = null;
+let requestSequence = 0;
+let lastDiscovery = null;
 
-const suggestions = [
-  { match: /indie|dream|mélanc|alternative|guitare/i, term: "indie alternative" },
-  { match: /électro|electro|electronic|techno|night|nocturne|after dark/i, term: "electronic indie" },
-  { match: /jazz|piano|instrumental|calme|soft|focus/i, term: "modern jazz" },
-  { match: /rock|énerg|energy|punk/i, term: "alternative rock" },
-  { match: /soul|rnb|r&b|sensuel/i, term: "neo soul" },
-  { match: /lofi|lo-fi|chill|relax/i, term: "lofi chill" },
-  { match: /rap|hip.?hop|trap/i, term: "underground hip hop" },
-  { match: /folk|acoustic|acoustique/i, term: "indie folk" },
-  { match: /français|francophone|france/i, term: "French indie" },
-  { match: /afro|amapiano/i, term: "afrobeats" }
-];
-
-function makeSearchTerm(vibe) {
-  const found = suggestions.find(item => item.match.test(vibe));
-  // L'API iTunes recherche les titres et artistes à partir d'un terme textuel.
-  // On garde une partie de la demande pour rendre la recherche plus personnelle.
-  return found ? found.term : vibe.trim();
+function esc(value = "") {
+  return String(value).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 }
-
-function escapeHTML(value = "") {
-  return String(value).replace(/[&<>"']/g, c => ({
-    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
-  })[c]);
+function artwork(track, size = "500x500bb") {
+  return (track.artworkUrl100 || "").replace("100x100bb", size);
 }
-
 function trackCard(track, index) {
   const id = String(track.trackId);
   const isSaved = saved.has(id);
-  const artwork = track.artworkUrl100
-    ? track.artworkUrl100.replace("100x100bb", "500x500bb")
-    : "";
+  const art = artwork(track);
   const preview = track.previewUrl || "";
-  return `
-    <article class="track-card" style="animation-delay:${Math.min(index * 55, 330)}ms">
-      <div class="art-wrap">
-        ${artwork ? `<img src="${escapeHTML(artwork)}" alt="Pochette de ${escapeHTML(track.trackName)}" loading="lazy">` : `<div class="art-placeholder">〰</div>`}
-        <span class="track-number">HF / ${String(index + 1 + offset).padStart(2, "0")}</span>
-        ${preview ? `<button class="play-preview" type="button" data-preview="${escapeHTML(preview)}" aria-label="Écouter un extrait de ${escapeHTML(track.trackName)}">▶</button>` : ""}
+  return `<article class="track-card" data-track-id="${esc(id)}" style="animation-delay:${Math.min(index*45,300)}ms">
+    <div class="art-wrap">
+      ${art ? `<img src="${esc(art)}" alt="Artwork for ${esc(track.trackName)}" loading="lazy">` : `<div class="art-placeholder">〰</div>`}
+      <span class="track-number">HF / ${String(index+1).padStart(2,"0")}</span>
+      ${preview ? `<button class="play-preview" type="button" data-preview="${esc(preview)}" aria-label="Play preview of ${esc(track.trackName)}">▶</button>` : ""}
+    </div>
+    <div class="track-info">
+      <div class="track-kicker">${esc(track.primaryGenreName || "Discovery")}</div>
+      <div class="track-title" title="${esc(track.trackName)}">${esc(track.trackName || "Untitled")}</div>
+      <div class="track-artist" title="${esc(track.artistName)}">${esc(track.artistName || "Unknown artist")}</div>
+      <div class="track-actions">
+        <button class="action-btn ${isSaved?"active":""}" type="button" data-save="${esc(id)}">${isSaved?"✓ SAVED":"♡ KEEP"}</button>
+        <button class="action-btn" type="button" data-skip="${esc(id)}">NOT MY VIBE ↗</button>
       </div>
-      <div class="track-info">
-        <div class="track-kicker">${escapeHTML(track.primaryGenreName || "A découvrir")}</div>
-        <div class="track-title" title="${escapeHTML(track.trackName)}">${escapeHTML(track.trackName || "Untitled")}</div>
-        <div class="track-artist" title="${escapeHTML(track.artistName)}">${escapeHTML(track.artistName || "Unknown artist")}</div>
-        <div class="track-actions">
-          <button class="action-btn ${isSaved ? "active" : ""}" type="button" data-save="${escapeHTML(id)}">${isSaved ? "✓ SAVED" : "♡ KEEP"}</button>
-          <button class="action-btn" type="button" data-skip="${escapeHTML(id)}">NOT MY VIBE ↗</button>
-        </div>
-      </div>
-      <a class="open-track" href="${escapeHTML(track.trackViewUrl || "#")}" target="_blank" rel="noopener noreferrer">OPEN TRACK ↗</a>
-    </article>`;
+    </div>
+    <a class="open-track" href="${esc(track.trackViewUrl || "#")}" target="_blank" rel="noopener noreferrer">OPEN TRACK ↗</a>
+  </article>`;
 }
-
+function updateEmptyState() { emptyState.hidden = grid.children.length > 0; }
 function renderTracks(tracks, append = false) {
   if (!append) grid.innerHTML = "";
-  const startIndex = append ? grid.children.length : 0;
-  grid.insertAdjacentHTML("beforeend", tracks.map((track, i) => trackCard(track, startIndex + i)).join(""));
-  moreBtn.hidden = tracks.length < 1;
+  const start = grid.children.length;
+  grid.insertAdjacentHTML("beforeend", tracks.map((track,i) => trackCard(track,start+i)).join(""));
+  updateEmptyState();
 }
-
-async function searchTracks(vibe, append = false) {
-  if (!append) {
-    currentQuery = vibe;
-    offset = 0;
-    currentTracks = [];
-    grid.innerHTML = "";
-    resultsTitle.textContent = "Tuning into your frequency…";
-    resultsMeta.textContent = "SEARCHING THE CATALOG";
-    status.textContent = "On cherche des morceaux qui pourraient matcher avec cette ambiance.";
-    moreBtn.hidden = true;
-  } else {
-    offset += 12;
-    moreBtn.disabled = true;
-    moreBtn.textContent = "Searching…";
+function shuffled(items) {
+  const arr = [...items];
+  for (let i=arr.length-1;i>0;i--) { const j=Math.floor(Math.random()*(i+1)); [arr[i],arr[j]]=[arr[j],arr[i]]; }
+  return arr;
+}
+async function callDiscovery(vibe, pageOffset = 0) {
+  const response = await fetch("/api/discover", {
+    method: "POST",
+    headers: {"Content-Type":"application/json"},
+    body: JSON.stringify({vibe, offset: pageOffset})
+  });
+  if (!response.ok) {
+    let message = "Discovery request failed.";
+    try { const data = await response.json(); message = data.error || message; } catch {}
+    const error = new Error(message);
+    error.status = response.status;
+    throw error;
   }
-
-  const term = makeSearchTerm(vibe);
-  const url = `https://itunes.apple.com/search?term=${encodeURIComponent(term)}&entity=song&limit=30&offset=${offset}&media=music`;
+  return response.json();
+}
+async function searchTracks(vibe, append = false) {
+  const requestId = ++requestSequence;
+  if (!append) {
+    currentQuery = vibe; offset = 0; currentTracks = []; shownTracks = []; lastDiscovery = null;
+    grid.innerHTML = ""; aiNote.hidden = true; aiNote.textContent = "";
+    resultsTitle.textContent = "Finding your frequency…";
+    resultsMeta.textContent = "TUNING THE SIGNAL";
+    status.textContent = "Reading the mood and searching the catalog…";
+    moreBtn.hidden = true; emptyState.hidden = true;
+  } else {
+    offset += 12; moreBtn.disabled = true; moreBtn.textContent = "Searching…";
+  }
   try {
-    const response = await fetch(url);
-    if (!response.ok) throw new Error("API unavailable");
-    const data = await response.json();
-    const tracks = (data.results || []).filter(t => t.trackId && t.trackName && t.artistName);
-    // Mélange les résultats pour donner une impression de découverte, sans prétendre mesurer leur popularité.
-    tracks.sort(() => Math.random() - 0.5);
-    const unique = tracks.filter(t => !currentTracks.some(existing => existing.trackId === t.trackId));
-    currentTracks = currentTracks.concat(unique);
-    if (!append) {
-      resultsTitle.textContent = "A few sounds worth finding.";
-      resultsMeta.textContent = `${unique.length} TRACKS FOUND`;
-      status.textContent = unique.length
-        ? `Résultats pour « ${vibe} ». Écoute les extraits, garde tes favoris et explore les morceaux complets.`
-        : "Pas de résultat cette fois. Essaie une vibe plus simple ou un genre musical.";
-    } else {
-      status.textContent = `Encore quelques pistes pour « ${vibe} ».`;
+    const data = await callDiscovery(vibe, append ? offset : 0);
+    if (requestId !== requestSequence) return;
+    const seen = new Set(currentTracks.map(t => String(t.trackId)));
+    const incoming = (data.tracks || []).filter(t => t.trackId && !seen.has(String(t.trackId)));
+    currentTracks = currentTracks.concat(incoming);
+    const batch = incoming.slice(0, 12);
+    shownTracks = shownTracks.concat(batch);
+    lastDiscovery = data.discovery || lastDiscovery;
+    resultsTitle.textContent = "A little further from the usual.";
+    resultsMeta.textContent = `${currentTracks.length} TRACKS FOUND`;
+    status.textContent = data.tracks?.length
+      ? `Results inspired by “${vibe}”. Save your finds, skip what misses, and open tracks to explore further.`
+      : "No matches this time. Try a different mood, genre, or artist.";
+    if (lastDiscovery) {
+      aiNote.innerHTML = `<strong>THE SIGNAL:</strong> ${esc(lastDiscovery.summary || "A few directions to explore.")} <span>Search paths: ${esc((lastDiscovery.searchTerms || []).join(" · "))}</span>`;
+      aiNote.hidden = false;
     }
-    renderTracks(unique.slice(0, 12), append);
-    if (unique.length === 0 && append) status.textContent = "Plus de résultats trouvés pour cette recherche. Essaie une autre vibe.";
-    moreBtn.hidden = unique.length < 12;
+    renderTracks(batch, append);
+    moreBtn.hidden = incoming.length < 12 || !data.hasMore;
+    if (!append && incoming.length === 0) updateEmptyState();
   } catch (error) {
+    if (requestId !== requestSequence) return;
     resultsTitle.textContent = "The signal got a little fuzzy.";
-    resultsMeta.textContent = "CONNECTION ISSUE";
-    status.textContent = "Impossible de joindre le catalogue musical. Vérifie ta connexion, puis réessaie.";
+    resultsMeta.textContent = error.status === 503 ? "AI NOT CONFIGURED" : "CONNECTION ISSUE";
+    if (error.status === 503) {
+      status.textContent = "The AI backend is not configured yet. Add OPENAI_API_KEY to your Cloudflare Pages environment variables, then redeploy.";
+    } else {
+      status.textContent = "Could not reach the recommendation engine. Check the deployment and try again.";
+    }
+    aiNote.hidden = false;
+    aiNote.textContent = "Setup tip: this version needs Cloudflare Pages Functions and an OpenAI API key stored as a server-side secret.";
     moreBtn.hidden = true;
+    updateEmptyState();
   } finally {
     moreBtn.disabled = false;
-    moreBtn.innerHTML = 'Show me more <span>＋</span>';
+    moreBtn.innerHTML = 'Explore more results <span>＋</span>';
   }
 }
-
-function toggleSaved(id) {
-  const track = currentTracks.find(t => String(t.trackId) === id);
-  if (!track) return;
-  if (saved.has(id)) saved.delete(id);
-  else saved.set(id, track);
+function renderSaved() {
   savedSection.hidden = saved.size === 0;
   savedCount.textContent = `${saved.size} SAVED`;
   savedList.innerHTML = [...saved.values()].map(track => {
-    const art = track.artworkUrl100 || "";
-    return `<div class="saved-row">${art ? `<img src="${escapeHTML(art)}" alt="">` : ""}
-      <div><strong>${escapeHTML(track.trackName)}</strong><small>${escapeHTML(track.artistName)}</small></div>
-      <a href="${escapeHTML(track.trackViewUrl || "#")}" target="_blank" rel="noopener noreferrer">OPEN ↗</a></div>`;
+    const art = artwork(track, "100x100bb");
+    return `<div class="saved-row">${art?`<img src="${esc(art)}" alt="">`:""}
+      <div><strong>${esc(track.trackName)}</strong><small>${esc(track.artistName)}</small></div>
+      <a href="${esc(track.trackViewUrl || "#")}" target="_blank" rel="noopener noreferrer">OPEN ↗</a></div>`;
   }).join("");
-  // Actualise l'état des boutons dans les résultats.
+}
+function toggleSaved(id) {
+  const track = currentTracks.find(t => String(t.trackId) === id);
+  if (!track) return;
+  if (saved.has(id)) saved.delete(id); else saved.set(id, track);
+  renderSaved();
   document.querySelectorAll("[data-save]").forEach(button => {
     const active = saved.has(button.dataset.save);
     button.classList.toggle("active", active);
     button.textContent = active ? "✓ SAVED" : "♡ KEEP";
   });
 }
-
+function applySort() {
+  const mode = sortSelect.value;
+  const sorted = [...shownTracks];
+  if (mode === "title") sorted.sort((a,b) => a.trackName.localeCompare(b.trackName));
+  else if (mode === "artist") sorted.sort((a,b) => a.artistName.localeCompare(b.artistName));
+  grid.innerHTML = ""; renderTracks(sorted);
+}
 form.addEventListener("submit", event => {
   event.preventDefault();
   const vibe = input.value.trim();
   if (vibe) searchTracks(vibe);
 });
 document.querySelectorAll("[data-vibe]").forEach(button => {
-  button.addEventListener("click", () => {
-    input.value = button.dataset.vibe;
-    searchTracks(button.dataset.vibe);
-  });
+  button.addEventListener("click", () => { input.value = button.dataset.vibe; searchTracks(button.dataset.vibe); });
 });
 moreBtn.addEventListener("click", () => searchTracks(currentQuery, true));
-
+sortSelect.addEventListener("change", applySort);
 grid.addEventListener("click", event => {
   const saveButton = event.target.closest("[data-save]");
   const skipButton = event.target.closest("[data-skip]");
   const previewButton = event.target.closest("[data-preview]");
   if (saveButton) toggleSaved(saveButton.dataset.save);
   if (skipButton) {
+    const id = skipButton.dataset.skip;
+    shownTracks = shownTracks.filter(t => String(t.trackId) !== id);
     const card = skipButton.closest(".track-card");
-    card.style.opacity = ".25";
-    card.style.transform = "scale(.97)";
-    setTimeout(() => card.remove(), 180);
+    card.style.opacity = "0"; card.style.transform = "scale(.97)";
+    setTimeout(() => { card.remove(); updateEmptyState(); }, 180);
   }
   if (previewButton) {
     const url = previewButton.dataset.preview;
     if (activeAudio && activeButton === previewButton) {
-      activeAudio.pause();
-      activeAudio = null;
-      activeButton.textContent = "▶";
-      activeButton = null;
-      return;
+      activeAudio.pause(); activeAudio = null; previewButton.textContent = "▶"; activeButton = null; return;
     }
-    if (activeAudio) {
-      activeAudio.pause();
-      if (activeButton) activeButton.textContent = "▶";
-    }
-    activeAudio = new Audio(url);
-    activeButton = previewButton;
-    previewButton.textContent = "Ⅱ";
-    activeAudio.play().catch(() => {
-      status.textContent = "L'extrait n'a pas pu être lu. Tu peux ouvrir le morceau complet via OPEN TRACK.";
-      previewButton.textContent = "▶";
-    });
-    activeAudio.addEventListener("ended", () => {
-      if (activeButton) activeButton.textContent = "▶";
-      activeAudio = null;
-      activeButton = null;
-    });
+    if (activeAudio) { activeAudio.pause(); if (activeButton) activeButton.textContent = "▶"; }
+    activeAudio = new Audio(url); activeButton = previewButton; previewButton.textContent = "Ⅱ";
+    activeAudio.play().catch(() => { status.textContent = "Preview playback failed. You can still open the full track."; previewButton.textContent = "▶"; });
+    activeAudio.addEventListener("ended", () => { if (activeButton) activeButton.textContent = "▶"; activeAudio = null; activeButton = null; });
   }
 });
