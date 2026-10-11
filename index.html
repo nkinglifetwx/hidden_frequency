@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#10110f">
+  <meta name="description" content="Hidden Frequencies — découvre des sons hors des sentiers battus.">
+  <title>Hidden Frequencies — Find your next sound</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="grain" aria-hidden="true"></div>
+  <header class="topbar">
+    <a class="brand" href="#" aria-label="Hidden Frequencies, accueil">
+      <span class="brand-mark"><i></i><i></i><i></i><i></i></span>
+      <span>hidden<span class="brand-light">frequencies</span></span>
+    </a>
+    <div class="top-note"><span class="live-dot"></span> INDEPENDENT SOUND FINDER</div>
+    <a class="about-link" href="#how">LE CONCEPT <span>↗</span></a>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="eyebrow"><span>01</span><span class="eyebrow-line"></span><span>YOUR NEXT OBSESSION IS OUT THERE</span></div>
+      <h1>Not everything<br>good is <em>known.</em></h1>
+      <p class="hero-copy">Décris une vibe. On part à la recherche d'un son que tu n'as probablement pas encore dans tes favoris.</p>
+
+      <form id="search-form" class="prompt-box">
+        <div class="prompt-top"><span class="tiny-label">WHAT ARE WE LOOKING FOR?</span><span class="prompt-counter">01 / DISCOVER</span></div>
+        <label class="sr-only" for="vibe-input">Décris le style de musique recherché</label>
+        <textarea id="vibe-input" rows="2" maxlength="180" placeholder="ex. indie mélancolique pour rentrer chez soi la nuit…" required></textarea>
+        <div class="prompt-bottom">
+          <span class="hint"><span class="spark">✳</span> Sois précis, ou laisse parler ton instinct.</span>
+          <button class="discover-btn" type="submit">Find a sound <span>↗</span></button>
+        </div>
+      </form>
+      <div class="quick-picks">
+        <span class="tiny-label">OR START WITH A VIBE</span>
+        <button type="button" class="chip" data-vibe="indie dreamy et mélancolique">dreamy indie</button>
+        <button type="button" class="chip" data-vibe="électro downtempo et nocturne">after dark</button>
+        <button type="button" class="chip" data-vibe="jazz instrumental calme et intimiste">soft focus</button>
+        <button type="button" class="chip" data-vibe="rock alternatif énergique et méconnu">off the radar</button>
+      </div>
+    </section>
+
+    <section class="results-section" id="results">
+      <div class="section-heading">
+        <div><div class="eyebrow"><span>02</span><span class="eyebrow-line"></span><span>THE FREQUENCY MATCH</span></div><h2 id="results-title">A few sounds worth finding.</h2></div>
+        <div id="results-meta" class="results-meta">CURATED BY CURIOSITY</div>
+      </div>
+      <div id="status" class="status" role="status">Décris une ambiance pour lancer ta première recherche.</div>
+      <div id="track-grid" class="track-grid"></div>
+      <button id="more-btn" class="more-btn" type="button" hidden>Show me more <span>＋</span></button>
+    </section>
+
+    <section class="saved-section" id="saved-section" hidden>
+      <div class="eyebrow"><span>03</span><span class="eyebrow-line"></span><span>YOUR SIGNAL</span></div>
+      <div class="saved-head"><h2>Keep the good ones.</h2><span id="saved-count">0 SAVED</span></div>
+      <div id="saved-list" class="saved-list"></div>
+    </section>
+
+    <section class="manifesto" id="how">
+      <div class="manifesto-symbol">〰</div>
+      <div><span class="tiny-label">A SMALL NOTE ON DISCOVERY</span><h2>Less algorithm.<br><em>More instinct.</em></h2></div>
+      <p>Pas besoin de connaître le genre exact. Décris juste une sensation, un endroit, une heure ou une énergie. Le reste, c'est de la curiosité.</p>
+    </section>
+  </main>
+
+  <footer>
+    <a class="brand footer-brand" href="#"><span class="brand-mark"><i></i><i></i><i></i><i></i></span><span>hidden<span class="brand-light">frequencies</span></span></a>
+    <span>MADE FOR THE NEXT REPEAT.</span>
+    <span class="footer-right">DISCOVER SOMETHING ELSE ↗</span>
+  </footer>
+  <script src="app.js"></script>
+</body>
+</html>
